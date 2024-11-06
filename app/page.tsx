@@ -38,7 +38,7 @@ export default function Home() {
                 <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
                 <h2 className="text-2xl font-semibold mb-4">Found Something?</h2>
                 <p className="text-muted-foreground mb-6">
-                  Help someone reunite with their lost possession by posting what you've found
+                  Help someone reunite with their lost possession by posting what you&apos;ve found
                 </p>
                 <Button size="lg" className="w-full">
                   Report Found Item
@@ -69,7 +69,7 @@ export default function Home() {
             <SearchIcon className="w-8 h-8 mb-4 text-primary" />
             <h3 className="text-xl font-semibold mb-2">Easy Search</h3>
             <p className="text-muted-foreground">
-              Quickly search through posted items to find what you're looking for
+              Quickly search through posted items to find what you&apos;re looking for
             </p>
           </Card>
         </div>
