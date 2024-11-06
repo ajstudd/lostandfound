@@ -12,7 +12,6 @@ function MyNavigationMenu() {
     return (
         <NavigationMenu>
             <NavigationMenuList>
-                {/* Menu Item 1 */}
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Home</NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -25,7 +24,6 @@ function MyNavigationMenu() {
                     </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Menu Item 2 with dropdown */}
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Report</NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -46,7 +44,6 @@ function MyNavigationMenu() {
                     </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Menu Item 3 */}
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>About</NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -55,6 +52,17 @@ function MyNavigationMenu() {
                             className="text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
                         >
                             Learn About Us
+                        </NavigationMenuLink>
+                    </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                    <NavigationMenuTrigger>Explore</NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                        <NavigationMenuLink
+                            href="/items"
+                            className="text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+                        >
+                            View Lost Items
                         </NavigationMenuLink>
                     </NavigationMenuContent>
                 </NavigationMenuItem>
