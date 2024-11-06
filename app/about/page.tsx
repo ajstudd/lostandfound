@@ -27,13 +27,13 @@ const AboutPage = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center">
-                            <Search className="mr-2" /> For Those Who've Lost
+                            <Search className="mr-2" /> For Those Who&apos;ve Lost
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p>
-                            Lost something valuable? Don't lose hope! Post about your lost item and let our
-                            community help you find it. With Lost Fin, you're not searching alone.
+                            Lost something valuable? Don&apos;t lose hope! Post about your lost item and let our
+                            community help you find it. With Lost Fin, you&apos;re not searching alone.
                         </p>
                     </CardContent>
                 </Card>
@@ -41,13 +41,13 @@ const AboutPage = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center">
-                            <Shield className="mr-2" /> For Those Who've Found
+                            <Shield className="mr-2" /> For Those Who&apos;ve Found
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p>
                             Found an item and want to return it to its rightful owner? List it on Lost Fin
-                            and help make someone's day. Your honesty can make a big difference!
+                            and help make someone&apos;s day. Your honesty can make a big difference!
                         </p>
                     </CardContent>
                 </Card>
@@ -62,7 +62,7 @@ const AboutPage = () => {
                         </CardHeader>
                         <CardContent>
                             <p>
-                                Whether you've lost or found an item, create a detailed post about it. Include
+                                Whether you&apos;ve lost or found an item, create a detailed post about it. Include
                                 descriptions, locations, and any other relevant information.
                             </p>
                         </CardContent>
@@ -103,7 +103,7 @@ const AboutPage = () => {
                     </CardHeader>
                     <CardContent>
                         <p className="mb-4">
-                            At Lost Fin, we believe in the power of community. Even if you haven't lost or
+                            At Lost Fin, we believe in the power of community. Even if you haven&apos;t lost or
                             found an item, you can still play a crucial role:
                         </p>
                         <ul className="list-disc pl-6 mb-4">
