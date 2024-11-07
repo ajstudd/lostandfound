@@ -27,7 +27,7 @@ export default function ItemDetailPage() {
     useEffect(() => {
         async function fetchItems() {
             try {
-                const response = await fetch(`http://localhost:8080/singleLostItem/${encodeURIComponent(id)}`, {
+                const response = await fetch(`api/singleLostItem/${encodeURIComponent(id)}`, {
                     method: "GET",
                 })
                 const data = await response.json()

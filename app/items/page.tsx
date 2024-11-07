@@ -32,7 +32,7 @@ export default function ItemsPage() {
   useEffect(() => {
     async function fetchItems() {
       try {
-        const response = await fetch("http://localhost:8080/getlostitems", {
+        const response = await fetch("api/getlostitems", {
           method: "GET",
         });
         const data = await response.json();

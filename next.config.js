@@ -4,7 +4,7 @@ async rewrites() {
   return [
     {
       source: '/api/:path*',
-      destination: 'http://localhost:8080/:path*', // Ensure this is the correct destination
+      destination: 'https://lost-and-found-api-bq99.onrender.com/:path*', // Ensure this is the correct destination
     },
   ];
 },
