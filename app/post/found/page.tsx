@@ -3,9 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -13,113 +21,138 @@ import { ArrowLeft, Upload } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
-import axios from "axios";
+import { compressImage } from "@/utils/compressImage"; // Make sure to import your image compression utility
+import axios from "axios"; // Import axios for API requests
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const formSchema = z.object({
-  itemName: z.string().min(2, { message: "Item name must be at least 2 characters." }),
-  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
-  foundLocation: z.string().min(5, { message: "Location must be at least 5 characters." }),
-  requirements: z.string().min(10, { message: "Requirements must be at least 10 characters." }),
-  finderName: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  finderEmail: z.string().email({ message: "Please enter a valid email address." }),
-  finderPhone: z.string().min(10, { message: "Please enter a valid phone number." }),
-  image: z.any()
-    .refine((files) => files?.length == 1, "Image is required.")
-    .refine((files) => files?.[0]?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
-    .refine((files) => ACCEPTED_IMAGE_TYPES.includes(files?.[0]?.type), ".jpg, .jpeg, .png and .webp files are accepted."),
+  itemName: z.string().min(2, {
+    message: "Item name must be at least 2 characters.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  location: z.string().min(5, {
+    message: "Location must be at least 5 characters.",
+  }),
+  returnRequirement: z.string().min(10, { message: "Requirements must be at least 10 characters." }),
+  contactName: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  contactEmail: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  contactPhone: z.string().min(10, {
+    message: "Please enter a valid phone number.",
+  }),
+  image: z
+    .any()
+    .refine((files) => files && files instanceof File, "Image is required.")
+    .refine((file) => file?.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine((file) => ACCEPTED_IMAGE_TYPES.includes(file?.type), ".jpg, .jpeg, .png and .webp files are accepted."),
 });
 
 export default function FoundItemForm() {
   const { toast } = useToast();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [compressedImage, setCompressedImage] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       itemName: "",
       description: "",
-      foundLocation: "",
-      requirements: "",
-      finderName: "",
-      finderEmail: "",
-      finderPhone: "",
+      location: "",
+      returnRequirement: "",
+      contactName: "",
+      contactEmail: "",
+      contactPhone: "",
     },
   });
 
-  // Function to compress the image
-  const compressImage = (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = (event) => {
-        // Using the native Image constructor
-        const img = new window.Image() as HTMLImageElement; // Explicitly using window.Image constructor
-        img.src = event.target?.result as string;
-
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d')!;
-
-          const scaleFactor = Math.min(1, 800 / Math.max(img.width, img.height));
-          canvas.width = img.width * scaleFactor;
-          canvas.height = img.height * scaleFactor;
-
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          canvas.toBlob(
-            (blob) => {
-              if (blob) resolve(blob);
-              else reject(new Error('Canvas to Blob conversion failed'));
-            },
-            file.type,
-            0.7
-          );
-        };
-      };
-
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!compressedImage) {
+      toast({
+        title: "Error",
+        description: "Please upload a valid image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const compressedImage = await compressImage(values.image[0]);
-
+      // Upload the compressed image to the server
       const formData = new FormData();
-      Object.entries(values).forEach(([key, value]) => {
-        if (key !== 'image') {
-          formData.append(key, value);
-        }
+      formData.append("file", compressedImage);
+      const imageUrl = await uploadImage(formData); // Upload image and get URL
+
+      // Now submit the form data along with the image URL
+      await submitFoundItemData({
+        ...values,
+        type: "found",
+        imageUrl,
       });
 
-      formData.append('image', compressedImage, values.image[0].name);
-
-      const response = await axios.post('/api/submit', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      toast({
+        title: "Found Item Report Submitted",
+        description: "We'll notify you when someone comes to claim the item.",
       });
-
-      if (response.status === 200) {
-        toast({
-          title: "Found Item Report Submitted",
-          description: "Thank you for helping return this item to its owner.",
-        });
-      } else {
-        throw new Error('Failed to submit the form');
-      }
+      console.log("Form submitted successfully");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to submit the form. Please try again.",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+      console.error("Error submitting form:", error);
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Compress the image before uploading
+      const compressedFile = await compressImage(file);
+      setCompressedImage(compressedFile);
+
+      // Show preview of the compressed image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(compressedFile);
+    }
+  };
+
+  // Function to upload the image to the server or cloud service
+  const uploadImage = async (formData: FormData) => {
+    try {
+      const response = await axios.post("/api/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status !== 200) throw new Error("Image upload failed");
+
+      return response.data.imageUrl; // The URL of the uploaded image
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
+  // Function to submit the lost item data to your backend
+  const submitFoundItemData = async (data: any) => {
+    try {
+      const response = await axios.post("/api/found-items", data);
+      if (response.status !== 200) throw new Error("Failed to submit found item");
+
+      return response.data; // Handle the response data if needed
+    } catch (error) {
+      console.error("Error submitting found item data:", error);
+      throw error;
     }
   };
 
@@ -162,58 +195,22 @@ export default function FoundItemForm() {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="foundLocation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Found Location</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Central Park, New York" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="requirements"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Requirements for Return</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="What does the owner need to do to claim this item?" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="image"
-              render={({ field: { onChange, value, ...rest } }) => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Item Image</FormLabel>
                   <FormControl>
                     <div className="flex items-center space-x-4">
                       <Input
+                        id="file-upload"
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg, image/png, image/webp"
                         onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            onChange(e.target.files);
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setPreviewImage(reader.result as string);
-                            };
-                            reader.readAsDataURL(file);
-                          }
+                          handleImageChange(e);
+                          field.onChange(e.target.files?.[0] ?? null); // Set the field value to the selected file
                         }}
-                        {...rest}
                       />
                       <Button
                         type="button"
@@ -225,22 +222,47 @@ export default function FoundItemForm() {
                       </Button>
                     </div>
                   </FormControl>
+                  <FormMessage />
                   {previewImage && (
                     <div className="mt-4">
-                      <Image src={previewImage} alt="Preview" width={200} height={200} className="rounded-md object-cover" />
+                      <Image src={previewImage} alt="Item Preview" width={100} height={100} className="object-cover" />
                     </div>
                   )}
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Central Park, New York" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="returnRequirement"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Requirements for Return</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="What does the owner need to do to claim this item?" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="space-y-8">
               <h2 className="text-xl font-semibold">Finder&apos;s Information</h2>
-
               <FormField
                 control={form.control}
-                name="finderName"
+                name="contactName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Your Name</FormLabel>
@@ -254,7 +276,7 @@ export default function FoundItemForm() {
 
               <FormField
                 control={form.control}
-                name="finderEmail"
+                name="contactEmail"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
@@ -268,22 +290,19 @@ export default function FoundItemForm() {
 
               <FormField
                 control={form.control}
-                name="finderPhone"
+                name="contactPhone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="tel" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-
-            <div className="flex justify-center">
-              <Button type="submit">Submit Report</Button>
-            </div>
+            <Button type="submit" className="w-full mt-6">Submit</Button>
           </form>
         </Form>
       </Card>

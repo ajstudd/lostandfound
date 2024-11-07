@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import {
     NavigationMenu,
     NavigationMenuList,
@@ -28,18 +29,12 @@ function MyNavigationMenu() {
                     <NavigationMenuTrigger>Report</NavigationMenuTrigger>
                     <NavigationMenuContent>
                         <div className="flex flex-col">
-                            <NavigationMenuLink
-                                href="/post/found"
-                                className="text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
-                            >
+                            <Link href="/post/found" className="text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-300 transition-colors">
                                 Found Item
-                            </NavigationMenuLink>
-                            <NavigationMenuLink
-                                href="/post/lost"
-                                className="text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
-                            >
+                            </Link>
+                            <Link href="/post/lost" className="text-gray-900 dark:text-white hover:text-blue-500 dark:hover:text-blue-300 transition-colors">
                                 Lost Item
-                            </NavigationMenuLink>
+                            </Link>
                         </div>
                     </NavigationMenuContent>
                 </NavigationMenuItem>

@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+async rewrites() {
+  return [
+    {
+      source: '/api/:path*',
+      destination: 'http://localhost:8080/:path*', // Ensure this is the correct destination
+    },
+  ];
+},
   eslint: {
     ignoreDuringBuilds: true,
   },
