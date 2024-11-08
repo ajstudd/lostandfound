@@ -2,7 +2,6 @@
 //NOTE: This is not in use for now
 import axios from "axios";
 
-// Upload image utility
 export const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -17,7 +16,6 @@ export const uploadImage = async (file: File) => {
   return response.data.imageUrl;
 };
 
-// Form submission utility for both Found and Lost items
 export const submitFormData = async (data: any, endpoint: string) => {
   try {
     const response = await axios.post(endpoint, data);

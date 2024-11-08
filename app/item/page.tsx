@@ -43,11 +43,11 @@ export default function ItemDetailPage() {
 
     const handleClaim = async () => {
         try {
-            const response = await fetch(`/api/items/${id}/claim`, { method: 'POST' })
-            if (!response.ok) {
-                throw new Error('Failed to claim item')
-            }
-            toast({ title: "Claim Submitted", description: "Your claim has been submitted successfully." })
+            // const response = await fetch(`/api/items/${id}/claim`, { method: 'POST' })
+            // if (!response.ok) {
+            //     throw new Error('Failed to claim item')
+            // }
+            toast({ title: "Congratulations!", description: "We're happy that you found the item." })
             setClaimSubmitted(true)
             setShowContact(true)
         } catch (error) {
@@ -176,7 +176,7 @@ export default function ItemDetailPage() {
                             {item.type === "lost" ? "I Found This Item" : "Claim This Item"}
                         </Button>
                     ) : (
-                        <p className="text-center text-sm text-muted-foreground">Contact the person directly to claim your item.</p>
+                        <p className="text-center text-sm text-muted-foreground">{`Contact the person directly to ${item.type === "lost" ? 'tell them about your finding.' : 'claim your item.'}`}</p>
                     )}
                     <div className="w-full space-y-2">
                         <Textarea

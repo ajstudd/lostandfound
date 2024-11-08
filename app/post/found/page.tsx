@@ -21,8 +21,8 @@ import { ArrowLeft, Upload } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
-import { compressImage } from "@/utils/compressImage"; // Make sure to import your image compression utility
-import axios from "axios"; // Import axios for API requests
+import { compressImage } from "@/utils/compressImage";
+import axios from "axios";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -83,12 +83,10 @@ export default function FoundItemForm() {
     }
 
     try {
-      // Upload the compressed image to the server
       const formData = new FormData();
       formData.append("file", compressedImage);
-      const imageUrl = await uploadImage(formData); // Upload image and get URL
+      const imageUrl = await uploadImage(formData);
 
-      // Now submit the form data along with the image URL
       await submitFoundItemData({
         ...values,
         type: "found",
@@ -100,6 +98,8 @@ export default function FoundItemForm() {
         description: "We'll notify you when someone comes to claim the item.",
       });
       console.log("Form submitted successfully");
+      form.reset();
+      setPreviewImage(null);
     } catch (error) {
       toast({
         title: "Error",
@@ -113,11 +113,9 @@ export default function FoundItemForm() {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Compress the image before uploading
       const compressedFile = await compressImage(file);
       setCompressedImage(compressedFile);
 
-      // Show preview of the compressed image
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
@@ -126,7 +124,6 @@ export default function FoundItemForm() {
     }
   };
 
-  // Function to upload the image to the server or cloud service
   const uploadImage = async (formData: FormData) => {
     try {
       const response = await axios.post("/api/upload-image", formData, {
@@ -136,20 +133,19 @@ export default function FoundItemForm() {
       });
       if (response.status !== 200) throw new Error("Image upload failed");
 
-      return response.data.imageUrl; // The URL of the uploaded image
+      return response.data.imageUrl;
     } catch (error) {
       console.error("Error uploading image:", error);
       throw error;
     }
   };
 
-  // Function to submit the lost item data to your backend
   const submitFoundItemData = async (data: any) => {
     try {
       const response = await axios.post("/api/found-items", data);
       if (response.status !== 200) throw new Error("Failed to submit found item");
 
-      return response.data; // Handle the response data if needed
+      return response.data;
     } catch (error) {
       console.error("Error submitting found item data:", error);
       throw error;

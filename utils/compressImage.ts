@@ -1,5 +1,5 @@
 // utils/compressImage.ts
-export const compressImage = async (file: File, maxFileSizeKB = 50): Promise<File> => {
+export const compressImage = async (file: File, maxFileSizeKB = 100): Promise<File> => {
   const img = document.createElement("img");
   const reader = new FileReader();
 
@@ -15,7 +15,6 @@ export const compressImage = async (file: File, maxFileSizeKB = 50): Promise<Fil
                   canvas.height = img.height;
                   ctx.drawImage(img, 0, 0);
 
-                  // Function to attempt compression with a decreasing quality value
                   const attemptCompression = (quality: number) => {
                       canvas.toBlob(
                           async (blob) => {
@@ -23,10 +22,8 @@ export const compressImage = async (file: File, maxFileSizeKB = 50): Promise<Fil
                                   if (blob.size / 1024 <= maxFileSizeKB) {
                                       resolve(new File([blob], file.name, { type: file.type }));
                                   } else if (quality > 0.1) {
-                                      // Reduce quality and try again
                                       attemptCompression(quality - 0.1);
                                   } else {
-                                      // If compression cannot meet the target, return the best result
                                       resolve(new File([blob], file.name, { type: file.type }));
                                   }
                               } else {
@@ -38,8 +35,7 @@ export const compressImage = async (file: File, maxFileSizeKB = 50): Promise<Fil
                       );
                   };
 
-                  // Start compression with initial quality
-                  attemptCompression(0.7); // Start with quality 0.7
+                  attemptCompression(0.7); 
               }
           };
       };
